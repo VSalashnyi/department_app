@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Department Application</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+</head>
+<body>
+    <nav>
+
+    </nav>
+    <div id="app">
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="departmentModal" tabindex="-1" role="dialog" aria-labelledby="departmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="departmentModalLabel">Add new department</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="dep_name">Name of department:</label>
+                            <input class="form-control" id="dep_name" placeholder="Enter the name of department...">
+                        </div>
+                        <div class="form-group">
+                            <label for="dep_head_name">Head name:</label>
+                            <input class="form-control" id="dep_head_name" placeholder="Enter the name of department head...">
+                        </div>
+                        <div class="form-group">
+                            <label for="dep_description">Department description:</label>
+                            <textarea name="" id="dep_description" placeholder="Enter the department description..." class="form-control" cols="30" rows="10"></textarea>
+                        </div>
+                        <!--<button type="submit" class="btn btn-primary">Submit</button>-->
+
+                        <div class="modal-footer">
+                            <button type="submit" id="add_department" data-dismiss="modal" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="workerModal" tabindex="-1" role="dialog" aria-labelledby="workerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="workerModalLabel">Add new department</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="worker_first_name">First name</label>
+                            <input class="form-control" id="worker_first_name" placeholder="Enter employer's first name">
+                        </div>
+                        <div class="form-group">
+                            <label for="worker_second_name">Second name</label>
+                            <input class="form-control" id="worker_second_name" placeholder="Enter employers's second name...">
+                        </div>
+                        <div class="form-group">
+                            <label for="worker_date">Date of birth:</label>
+                            <input class="form-control" id="worker_date" placeholder="Enter employer's date pf birth">
+                        </div>
+                        <div class="form-group">
+                            <label for="worker_salary">Salary</label>
+                            <input class="form-control" id="worker_salary" placeholder="Enter employer's salary">
+                        </div>
+                        <!--<button type="submit" class="btn btn-primary">Submit</button>-->
+
+                        <div class="modal-footer">
+                            <button type="submit" id="add_worker" data-dismiss="modal" class="btn btn-primary">Add Worker</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    <script>
+
+
+        window.onload = function() {
+            var app = document.querySelector('#app'),
+                addDepartmentBtn = document.querySelector('#add_department'),
+                addWorkerBtn = document.querySelector('#add_worker'),
+                nav = document.querySelector('nav'),
+                state;
+
+             //fetching data
+            fetch('http://www.mocky.io/v2/5c20b11d2e000081001e0bb1')
+                .then(res => res.json())
+                .then(data => {
+                    state = data;
+                    buildNavigation(data);
+                    render(document.location.pathname.substring(1));
+                });
+
+            //building navigation menu
+            function buildNavigation(data) {
+                //navigation menu clearing
+                 nav.innerHTML = '';
+
+                //creating buttons
+                 data.forEach(chunk => {
+                     nav.innerHTML += `<button route="/${chunk.department.toLowerCase()}"
+                                               class="btn btn-secondary m-3">${chunk.department}</button>`;
+                 })
+
+                //add "+" button
+                nav.innerHTML += `<button class="btn btn-warning m-3" data-toggle="modal" data-target="#departmentModal">+</button>`
+
+                 //adding events on button click
+                 Array.from(document.querySelectorAll('[route]')).forEach(btn => {
+                     btn.addEventListener('click', navigate, false);
+                 });
+
+             }
+
+             function navigate(e) {
+                 render(e.target.innerHTML.toLowerCase());
+                 window.history.pushState(
+                     {},
+                     e.target.attributes[0].value,
+                     e.target.attributes[0].value
+                 );
+             }
+
+            addDepartmentBtn.addEventListener('click',(e) => {
+                var depName = document.getElementById('dep_name'),
+                    depHeadName = document.getElementById('dep_head_name'),
+                    depDescription = document.getElementById('dep_description');
+                    state.push({
+                        department: depName.value,
+                        description: depDescription.value,
+                        head: depHeadName.value,
+                        workers: []
+                    });
+
+
+                    depName.value = '';
+                    depHeadName.value = '';
+                    depDescription.value ='';
+                    buildNavigation(state);
+                    e.preventDefault();
+            })
+
+            addWorkerBtn.addEventListener('click',(e) => {
+                var workerFirstName = document.getElementById('worker_first_name'),
+                    workerSecondName = document.getElementById('worker_second_name'),
+                    workerDateOfBirth = document.getElementById('worker_date'),
+                    workerSalary = document.getElementById('worker_salary');
+                var current = document.location.pathname.substring(1);
+                state = state.map(item => {
+                    if(item.department.toLowerCase() == current){
+                        item.workers.push({
+                            firstName: workerFirstName.value,
+                            secondName: workerSecondName.value,
+                            date: workerDateOfBirth.value,
+                            salary: workerSalary.value,
+                        })
+                        return item;
+                    } else {
+                        return item;
+                    }
+                });
+
+                render(current);
+
+                workerFirstName.value = '';
+                workerSecondName.value = '';
+                workerDateOfBirth.value ='';
+                workerSalary.value ='';
+                e.preventDefault();
+            })
+
+
+
+
+
+
+
+            function render(param = undefined){
+                console.log(param);
+                 if(param == ''){
+                     app.innerHTML = '<div class="jumbotron">' +
+                         '<h1 class="display-4">Choose department you are interesting in.</h1>' +
+                     '</div>';
+
+                 } else if(param == undefined) {
+                     app.innerHTML = '<div class="jumbotron">' +
+                         '<h1 class="display-4">No department left. Add new department.</h1>' +
+                         '</div>';
+                 }
+                 else {
+                     var current = state.filter(data => data.department.toLowerCase() == param)[0];
+
+                     console.log(current);
+
+                     var div = document.createElement('div');
+                     div.classList = 'jumbotron';
+
+                     var header = document.createElement('h3');
+                     header.classList = 'display-4';
+                     header.innerHTML = current.department;
+
+                     var deleteBtn = document.createElement('button');
+                     deleteBtn.classList = 'btn btn-danger';
+                     deleteBtn.innerText = 'Delete';
+                     deleteBtn.addEventListener('click', () => {
+                         console.log(state);
+                         state = state.filter(item => {
+                                 return item.department !== current.department
+                             }
+                         )
+                         buildNavigation(state);
+                         if(state.length){
+                             render(state[state.length - 1].department.toLowerCase())
+                         }  else {
+                             render(undefined)
+                         }
+                         ;
+
+                     })
+                     var head = document.createElement('p')
+                     head.innerHTML = 'Head of department - <b>' + current.head + '</b>';
+
+
+                     var hr = document.createElement('hr');
+                     hr.classList = 'my-4';
+
+                     var description = document.createElement('p');
+                     description.innerHTML = current.description;
+
+                     var title = document.createElement('h3');
+                     title.innerText = 'Employers:'
+
+                     var table = document.createElement('table');
+                     table.classList = "table";
+                     if(current.workers.length == 0){
+                         table.innerHTML = "You have not any workers";
+                     } else {
+                         current.workers.forEach(worker => {
+                             table.innerHTML += `<tr>
+                                                <td>${worker.firstName}</td>
+                                                <td>${worker.secondName}</td>
+                                                <td>${worker.date}</td>
+                                                <td>${worker.salary}</td>
+                                             </tr>`
+                         })
+
+                     }
+
+                     var addWorkerBtn = document.createElement('button');
+                     addWorkerBtn.classList = 'btn btn-success';
+                     addWorkerBtn.innerText = 'Add New Worker';
+                     addWorkerBtn.setAttribute('data-toggle', 'modal');
+                     addWorkerBtn.setAttribute('data-target', '#workerModal');
+                     addWorkerBtn.innerText = 'Add New Worker';
+
+
+
+
+
+                     div.appendChild(header)
+                     div.appendChild(deleteBtn)
+                     div.appendChild(head);
+                     div.appendChild(hr);
+                     div.appendChild(description);
+                     div.appendChild(title);
+                     div.appendChild(table);
+                     div.appendChild(addWorkerBtn);
+
+                     app.innerHTML = '';
+                     app.appendChild(div);
+                 }
+
+            }
+
+            window.onpopstate = function(){
+                render(document.location.pathname.substring(1));
+            }
+         }
+    </script>
+</body>
+</html>
