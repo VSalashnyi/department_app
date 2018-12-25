@@ -56,7 +56,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="workerModalLabel">Add new department</h5>
+                    <h5 class="modal-title" id="workerModalLabel">Add new worker</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -73,7 +73,7 @@
                         </div>
                         <div class="form-group">
                             <label for="worker_date">Date of birth:</label>
-                            <input class="form-control" id="worker_date" placeholder="Enter employer's date pf birth">
+                            <input class="form-control" type="date" id="worker_date" placeholder="Enter employer's date pf birth">
                         </div>
                         <div class="form-group">
                             <label for="worker_salary">Salary</label>
@@ -91,25 +91,71 @@
         </div>
     </div>
 
+    <div class="modal fade" id="editWorkerModal" tabindex="-1" role="dialog" aria-labelledby="editWorkerModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editWorkerModalLabel">Change information:</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="edit_worker_first_name">First name</label>
+                                <input class="form-control" id="edit_worker_first_name" placeholder="Enter employer's first name">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_worker_second_name">Second name</label>
+                                <input class="form-control" id="edit_worker_second_name" placeholder="Enter employers's second name...">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_worker_date">Date of birth:</label>
+                                <input class="form-control" type="date" id="edit_worker_date" placeholder="Enter employer's date pf birth">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_worker_salary">Salary</label>
+                                <input class="form-control" id="edit_worker_salary" placeholder="Enter employer's salary">
+                            </div>
+                            <!--<button type="submit" class="btn btn-primary">Submit</button>-->
+    
+                            <div class="modal-footer">
+                                <button type="submit" id="edit_worker" data-dismiss="modal" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+    
+                </div>
+            </div>
+        </div>
+
+
+    
 
 
 
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+
+        <script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
     <script>
-
-
         window.onload = function() {
             var app = document.querySelector('#app'),
                 addDepartmentBtn = document.querySelector('#add_department'),
                 addWorkerBtn = document.querySelector('#add_worker'),
+                editWorkerBtn = document.querySelector('#edit_worker'),
                 nav = document.querySelector('nav'),
-                state;
+                state,
+                current_page = '',
+                current_item;
 
              //fetching data
-            fetch('http://www.mocky.io/v2/5c20b11d2e000081001e0bb1')
+            fetch('http://www.mocky.io/v2/5c221bc83500007400d553d7')
                 .then(res => res.json())
                 .then(data => {
                     state = data;
@@ -120,11 +166,11 @@
             //building navigation menu
             function buildNavigation(data) {
                 //navigation menu clearing
-                 nav.innerHTML = '';
+                nav.innerHTML = '';
 
                 //creating buttons
-                 data.forEach(chunk => {
-                     nav.innerHTML += `<button route="/${chunk.department.toLowerCase()}"
+                data.forEach(chunk => {
+                    nav.innerHTML += `<button route="/${chunk.department.toLowerCase()}"
                                                class="btn btn-secondary m-3">${chunk.department}</button>`;
                  })
 
@@ -138,8 +184,11 @@
 
              }
 
+             
              function navigate(e) {
                  render(e.target.innerHTML.toLowerCase());
+                 current_page = e.target.attributes[0].value.substring(1);//
+                 console.log("navigation");
                  window.history.pushState(
                      {},
                      e.target.attributes[0].value,
@@ -152,6 +201,7 @@
                     depHeadName = document.getElementById('dep_head_name'),
                     depDescription = document.getElementById('dep_description');
                     state.push({
+                        id: state.length ? state[state.length - 1].id + 1 : 1,
                         department: depName.value,
                         description: depDescription.value,
                         head: depHeadName.value,
@@ -171,10 +221,11 @@
                     workerSecondName = document.getElementById('worker_second_name'),
                     workerDateOfBirth = document.getElementById('worker_date'),
                     workerSalary = document.getElementById('worker_salary');
-                var current = document.location.pathname.substring(1);
+                //var current = document.location.pathname.substring(1);
                 state = state.map(item => {
-                    if(item.department.toLowerCase() == current){
+                    if(item.department.toLowerCase() == current_page){
                         item.workers.push({
+                            id: item.workers.length ? item.workers[item.workers.length - 1].id + 1 : 1, 
                             firstName: workerFirstName.value,
                             secondName: workerSecondName.value,
                             date: workerDateOfBirth.value,
@@ -186,7 +237,7 @@
                     }
                 });
 
-                render(current);
+                render(current_page);
 
                 workerFirstName.value = '';
                 workerSecondName.value = '';
@@ -195,17 +246,40 @@
                 e.preventDefault();
             })
 
-
-
-
-
+            editWorkerBtn.addEventListener('click', () => {
+                                state = state.map(dep => {
+                                    if(dep.department.toLowerCase() == current_page){
+                                     return {
+                                         ...dep,
+                                         workers: dep.workers.map(worker => {
+                                             if(worker.id == current_item){
+                                                 return {
+                                                     id:worker.id,
+                                                     firstName:$('#edit_worker_first_name').val(),
+                                                     secondName:$('#edit_worker_second_name').val(),
+                                                     date:$('#edit_worker_date').val(),
+                                                     salary:$('#edit_worker_salary').val(),
+                                                 }
+                                             } else {
+                                                 return worker;
+                                             }
+                                            })
+                                        }  
+                                    } else{
+                                        return dep;
+                                    }
+                                })
+                        render(current_page);
+                        console.log(state)
+                        }); 
+            
 
 
             function render(param = undefined){
                 console.log(param);
                  if(param == ''){
                      app.innerHTML = '<div class="jumbotron">' +
-                         '<h1 class="display-4">Choose department you are interesting in.</h1>' +
+                         '<h1 class="display-4">Choose department you are interesting in, or add your own.</h1>' +
                      '</div>';
 
                  } else if(param == undefined) {
@@ -215,9 +289,6 @@
                  }
                  else {
                      var current = state.filter(data => data.department.toLowerCase() == param)[0];
-
-                     console.log(current);
-
                      var div = document.createElement('div');
                      div.classList = 'jumbotron';
 
@@ -226,7 +297,7 @@
                      header.innerHTML = current.department;
 
                      var deleteBtn = document.createElement('button');
-                     deleteBtn.classList = 'btn btn-danger';
+                     deleteBtn.classList = 'btn btn-danger mt-3 mb-3';
                      deleteBtn.innerText = 'Delete';
                      deleteBtn.addEventListener('click', () => {
                          console.log(state);
@@ -236,14 +307,14 @@
                          )
                          buildNavigation(state);
                          if(state.length){
-                             render(state[state.length - 1].department.toLowerCase())
+                             render(state[state.length - 1].department.toLowerCase());
                          }  else {
                              render(undefined)
                          }
                          ;
 
                      })
-                     var head = document.createElement('p')
+                     var head = document.createElement('p');
                      head.innerHTML = 'Head of department - <b>' + current.head + '</b>';
 
 
@@ -267,10 +338,18 @@
                                                 <td>${worker.secondName}</td>
                                                 <td>${worker.date}</td>
                                                 <td>${worker.salary}</td>
+                                                
+                                                <td><button route="${worker.id}" class="btn btn-warning" data-toggle="modal" data-target="#editWorkerModal" >Edit</button></td>
                                              </tr>`
                          })
 
+                         
                      }
+
+                     
+
+
+                                    
 
                      var addWorkerBtn = document.createElement('button');
                      addWorkerBtn.classList = 'btn btn-success';
@@ -278,11 +357,7 @@
                      addWorkerBtn.setAttribute('data-toggle', 'modal');
                      addWorkerBtn.setAttribute('data-target', '#workerModal');
                      addWorkerBtn.innerText = 'Add New Worker';
-
-
-
-
-
+                     
                      div.appendChild(header)
                      div.appendChild(deleteBtn)
                      div.appendChild(head);
@@ -294,13 +369,40 @@
 
                      app.innerHTML = '';
                      app.appendChild(div);
-                 }
+                     (Array.from(document.querySelectorAll('table tr td button'))).forEach(btn => {
+                     btn.addEventListener('click', (e) => { 
+                         current_item = e.target.attributes[0].value;
+                        var editWorkerFirstName = document.getElementById('edit_worker_first_name'),
+                            editWorkerSecondName = document.getElementById('edit_worker_second_name'),
+                            editWorkerDateOfBirth = document.getElementById('edit_worker_date'),
+                            editWorkerSalary = document.getElementById('edit_worker_salary');
+                            
+                            console.log(state.filter(dep => dep.department.toLowerCase() == current_page)[0].workers.filter(worker => worker.id == e.target.attributes[0].value)[0].firstName);
 
+                            $('#edit_worker_first_name').val(state.filter(dep => dep.department.toLowerCase() == current_page)[0].workers.filter(worker => worker.id == e.target.attributes[0].value)[0].firstName);
+                          
+                        });
+                    });
+
+
+
+                 }
             }
 
             window.onpopstate = function(){
+                console.log('pop state');
+                current_page = document.location.pathname.substring(1);
                 render(document.location.pathname.substring(1));
             }
+
+            window.onbeforeunload = function(){
+                window.history.pushState(
+                     {},
+                     '/',
+                     '/'
+                 );
+                 render('')
+            }()
          }
     </script>
 </body>
