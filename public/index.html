@@ -43,7 +43,7 @@
                         <!--<button type="submit" class="btn btn-primary">Submit</button>-->
 
                         <div class="modal-footer">
-                            <button type="submit" id="add_department" data-dismiss="modal" class="btn btn-primary">Save changes</button>
+                            <button type="submit" id="add_department" data-dismiss="modal" class="btn btn-primary">Add</button>
                         </div>
                     </form>
                 </div>
@@ -77,12 +77,12 @@
                         </div>
                         <div class="form-group">
                             <label for="worker_salary">Salary</label>
-                            <input class="form-control" id="worker_salary" placeholder="Enter employer's salary">
+                            <input class="form-control" type="number"  id="worker_salary" placeholder="Enter employer's salary">
                         </div>
                         <!--<button type="submit" class="btn btn-primary">Submit</button>-->
 
                         <div class="modal-footer">
-                            <button type="submit" id="add_worker" data-dismiss="modal" class="btn btn-primary">Add Worker</button>
+                            <button type="submit" id="add_worker"data-dismiss="modal" class="btn btn-primary">Add Worker</button>
                         </div>
                     </form>
                 </div>
@@ -116,7 +116,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="edit_worker_salary">Salary</label>
-                                <input class="form-control" id="edit_worker_salary" placeholder="Enter employer's salary">
+                                <input class="form-control" type="number" id="edit_worker_salary" placeholder="Enter employer's salary">
                             </div>
                             <!--<button type="submit" class="btn btn-primary">Submit</button>-->
     
@@ -130,13 +130,6 @@
             </div>
         </div>
 
-
-    
-
-
-
-
-
         <script
         src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
@@ -144,266 +137,270 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
     <script>
-        window.onload = function() {
-            var app = document.querySelector('#app'),
-                addDepartmentBtn = document.querySelector('#add_department'),
-                addWorkerBtn = document.querySelector('#add_worker'),
-                editWorkerBtn = document.querySelector('#edit_worker'),
-                nav = document.querySelector('nav'),
-                state,
-                current_page = '',
-                current_item;
 
+        var state,
+            current_page,
+            current_item;
+
+        window.onload = function() {
              //fetching data
             fetch('http://www.mocky.io/v2/5c221bc83500007400d553d7')
                 .then(res => res.json())
                 .then(data => {
                     state = data;
                     buildNavigation(data);
-                    render(document.location.pathname.substring(1));
+                    render('');
                 });
-
-            //building navigation menu
-            function buildNavigation(data) {
-                //navigation menu clearing
-                nav.innerHTML = '';
-
-                //creating buttons
-                data.forEach(chunk => {
-                    nav.innerHTML += `<button route="/${chunk.department.toLowerCase()}"
-                                               class="btn btn-secondary m-3">${chunk.department}</button>`;
-                 })
-
-                //add "+" button
-                nav.innerHTML += `<button class="btn btn-warning m-3" data-toggle="modal" data-target="#departmentModal">+</button>`
-
-                 //adding events on button click
-                 Array.from(document.querySelectorAll('[route]')).forEach(btn => {
-                     btn.addEventListener('click', navigate, false);
-                 });
-
-             }
-
-             
-             function navigate(e) {
-                 render(e.target.innerHTML.toLowerCase());
-                 current_page = e.target.attributes[0].value.substring(1);//
-                 console.log("navigation");
-                 window.history.pushState(
-                     {},
-                     e.target.attributes[0].value,
-                     e.target.attributes[0].value
-                 );
-             }
-
-            addDepartmentBtn.addEventListener('click',(e) => {
-                var depName = document.getElementById('dep_name'),
-                    depHeadName = document.getElementById('dep_head_name'),
-                    depDescription = document.getElementById('dep_description');
-                    state.push({
-                        id: state.length ? state[state.length - 1].id + 1 : 1,
-                        department: depName.value,
-                        description: depDescription.value,
-                        head: depHeadName.value,
-                        workers: []
-                    });
+            }
 
 
-                    depName.value = '';
-                    depHeadName.value = '';
-                    depDescription.value ='';
-                    buildNavigation(state);
-                    e.preventDefault();
+        function buildNavigation(data) {
+            //navigation menu clearing
+            $('nav').empty();
+
+            //creating buttons
+            data.forEach(chunk => {
+                $('nav').append(`<button route="/${chunk.department.toLowerCase()}"
+                                               class="btn btn-secondary m-3">${chunk.department}</button>`);
             })
 
-            addWorkerBtn.addEventListener('click',(e) => {
-                var workerFirstName = document.getElementById('worker_first_name'),
-                    workerSecondName = document.getElementById('worker_second_name'),
-                    workerDateOfBirth = document.getElementById('worker_date'),
-                    workerSalary = document.getElementById('worker_salary');
-                //var current = document.location.pathname.substring(1);
-                state = state.map(item => {
-                    if(item.department.toLowerCase() == current_page){
-                        item.workers.push({
-                            id: item.workers.length ? item.workers[item.workers.length - 1].id + 1 : 1, 
-                            firstName: workerFirstName.value,
-                            secondName: workerSecondName.value,
-                            date: workerDateOfBirth.value,
-                            salary: workerSalary.value,
-                        })
-                        return item;
-                    } else {
-                        return item;
-                    }
-                });
+            //add "+" button
+            $('nav').append(`<button class="btn btn-warning m-3" data-toggle="modal" data-target="#departmentModal">+</button>`);
 
-                render(current_page);
-
-                workerFirstName.value = '';
-                workerSecondName.value = '';
-                workerDateOfBirth.value ='';
-                workerSalary.value ='';
-                e.preventDefault();
-            })
-
-            editWorkerBtn.addEventListener('click', () => {
-                                state = state.map(dep => {
-                                    if(dep.department.toLowerCase() == current_page){
-                                     return {
-                                         ...dep,
-                                         workers: dep.workers.map(worker => {
-                                             if(worker.id == current_item){
-                                                 return {
-                                                     id:worker.id,
-                                                     firstName:$('#edit_worker_first_name').val(),
-                                                     secondName:$('#edit_worker_second_name').val(),
-                                                     date:$('#edit_worker_date').val(),
-                                                     salary:$('#edit_worker_salary').val(),
-                                                 }
-                                             } else {
-                                                 return worker;
-                                             }
-                                            })
-                                        }  
-                                    } else{
-                                        return dep;
-                                    }
-                                })
-                        render(current_page);
-                        console.log(state)
-                        }); 
-            
+            //adding event on navigation button click
+            Array.from(document.querySelectorAll('[route]')).forEach(btn => {
+                btn.addEventListener('click', navigate, false);
+            });
+        }
 
 
-            function render(param = undefined){
-                console.log(param);
-                 if(param == ''){
-                     app.innerHTML = '<div class="jumbotron">' +
-                         '<h1 class="display-4">Choose department you are interesting in, or add your own.</h1>' +
-                     '</div>';
+        function navigate(e) {
+            render(e.target.innerHTML.toLowerCase());
+            //current page updating
+            current_page = e.target.attributes[0].value.substring(1);
+            window.history.pushState(
+                {},
+                e.target.attributes[0].value,
+                e.target.attributes[0].value
+            );
+        }
 
-                 } else if(param == undefined) {
-                     app.innerHTML = '<div class="jumbotron">' +
-                         '<h1 class="display-4">No department left. Add new department.</h1>' +
-                         '</div>';
-                 }
-                 else {
-                     var current = state.filter(data => data.department.toLowerCase() == param)[0];
-                     var div = document.createElement('div');
-                     div.classList = 'jumbotron';
+        function render(param) {
+            if (param == '') {
+                $('#app').html('<div class="jumbotron">' +
+                    '<h1 class="display-4">Choose department you are interesting in, or add your own.</h1>' +
+                    '</div>');
+            } else if (param == 'oops') {
+                $('#app').html('<div class="jumbotron">' +
+                    '<h1 class="display-4">No department left. Add new department.</h1>' +
+                    '</div>');
+            } else {
+                var current_department = state.filter(data => data.department.toLowerCase() == param)[0];
+                $('#app').empty();
 
-                     var header = document.createElement('h3');
-                     header.classList = 'display-4';
-                     header.innerHTML = current.department;
-
-                     var deleteBtn = document.createElement('button');
-                     deleteBtn.classList = 'btn btn-danger mt-3 mb-3';
-                     deleteBtn.innerText = 'Delete';
-                     deleteBtn.addEventListener('click', () => {
-                         console.log(state);
-                         state = state.filter(item => {
-                                 return item.department !== current.department
-                             }
-                         )
-                         buildNavigation(state);
-                         if(state.length){
-                             render(state[state.length - 1].department.toLowerCase());
-                         }  else {
-                             render(undefined)
-                         }
-                         ;
-
-                     })
-                     var head = document.createElement('p');
-                     head.innerHTML = 'Head of department - <b>' + current.head + '</b>';
+                $('<div/>').addClass('jumbotron')
+                    .appendTo('#app');
 
 
-                     var hr = document.createElement('hr');
-                     hr.classList = 'my-4';
+                $('<h3/>').addClass('display-4 d-inline')
+                    .html(current_department.department)
+                    .appendTo('.jumbotron');
 
-                     var description = document.createElement('p');
-                     description.innerHTML = current.description;
 
-                     var title = document.createElement('h3');
-                     title.innerText = 'Employers:'
+                $('<button/>').addClass('btn btn-danger ml-5 mb-3')
+                    .text('Delete')
+                    .click(() => {
+                        state = state.filter(item =>
+                            item.department !== current_department.department
+                        );
+                        buildNavigation(state);
+                        if (state.length) {
+                            current_page = state[state.length - 1].department.toLowerCase();
+                            window.history.pushState(
+                                {},
+                                current_page,
+                                current_page
+                            );
+                            render(state[state.length - 1].department.toLowerCase());
+                        } else {
+                            window.history.pushState(
+                                {},
+                                '/oops',
+                                '/oops'
+                            );
+                            render('oops');
+                        }
+                    }).appendTo('.jumbotron');
 
-                     var table = document.createElement('table');
-                     table.classList = "table";
-                     if(current.workers.length == 0){
-                         table.innerHTML = "You have not any workers";
-                     } else {
-                         current.workers.forEach(worker => {
-                             table.innerHTML += `<tr>
+                $('<p/>').html('Head of department - <b>' + current_department.head + '</b>')
+                    .appendTo('.jumbotron');
+
+                $('<p/>').html('Avarage salary : ' + avarageSalary(current_department))
+                    .appendTo('.jumbotron')
+
+
+                $('<hr/>').addClass('my-4')
+                    .appendTo('.jumbotron');
+
+                $('<p/>').html(current_department.description)
+                    .appendTo('.jumbotron');
+
+                $('<h3/>').html('Employers:')
+                    .appendTo('.jumbotron');
+
+
+                var $table = $('<table/>').addClass('table');
+                if (current_department.workers.length == 0) {
+                    $table.append("You have not any workers");
+                } else {
+                    current_department.workers.forEach(worker => {
+                        $table.append(`<tr>
                                                 <td>${worker.firstName}</td>
                                                 <td>${worker.secondName}</td>
                                                 <td>${worker.date}</td>
                                                 <td>${worker.salary}</td>
-                                                
-                                                <td><button route="${worker.id}" class="btn btn-warning" data-toggle="modal" data-target="#editWorkerModal" >Edit</button></td>
-                                             </tr>`
-                         })
+                                                <td><button route="${worker.id}" class="btn btn-warning" data-toggle="modal" data-target="#editWorkerModal" >Edit</button>
+                                                <button del_id="${worker.id}" class="btn btn-danger">Delete</button></td>
+                                             </tr>`)
+                    })
+                }
+                $('.jumbotron').append($table);
 
-                         
-                     }
+                $('<button/>').addClass('btn btn-success')
+                    .text('Add New Worker')
+                    .attr('data-toggle', 'modal')
+                    .attr('data-target', '#workerModal')
+                    .appendTo('.jumbotron');
 
-                     
+                (Array.from(document.querySelectorAll('table tr td button[route]'))).forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        current_item = e.target.attributes[0].value;
+                        $('#edit_worker_first_name').val(state.filter(dep => dep.department.toLowerCase() == current_page)[0].workers.filter(worker => worker.id == e.target.attributes[0].value)[0].firstName);
+                        $('#edit_worker_second_name').val(state.filter(dep => dep.department.toLowerCase() == current_page)[0].workers.filter(worker => worker.id == e.target.attributes[0].value)[0].secondName);
+                        $('#edit_worker_date').val(state.filter(dep => dep.department.toLowerCase() == current_page)[0].workers.filter(worker => worker.id == e.target.attributes[0].value)[0].date);
+                        $('#edit_worker_salary').val(state.filter(dep => dep.department.toLowerCase() == current_page)[0].workers.filter(worker => worker.id == e.target.attributes[0].value)[0].salary);
 
-
-                                    
-
-                     var addWorkerBtn = document.createElement('button');
-                     addWorkerBtn.classList = 'btn btn-success';
-                     addWorkerBtn.innerText = 'Add New Worker';
-                     addWorkerBtn.setAttribute('data-toggle', 'modal');
-                     addWorkerBtn.setAttribute('data-target', '#workerModal');
-                     addWorkerBtn.innerText = 'Add New Worker';
-                     
-                     div.appendChild(header)
-                     div.appendChild(deleteBtn)
-                     div.appendChild(head);
-                     div.appendChild(hr);
-                     div.appendChild(description);
-                     div.appendChild(title);
-                     div.appendChild(table);
-                     div.appendChild(addWorkerBtn);
-
-                     app.innerHTML = '';
-                     app.appendChild(div);
-                     (Array.from(document.querySelectorAll('table tr td button'))).forEach(btn => {
-                     btn.addEventListener('click', (e) => { 
-                         current_item = e.target.attributes[0].value;
-                        var editWorkerFirstName = document.getElementById('edit_worker_first_name'),
-                            editWorkerSecondName = document.getElementById('edit_worker_second_name'),
-                            editWorkerDateOfBirth = document.getElementById('edit_worker_date'),
-                            editWorkerSalary = document.getElementById('edit_worker_salary');
-                            
-                            console.log(state.filter(dep => dep.department.toLowerCase() == current_page)[0].workers.filter(worker => worker.id == e.target.attributes[0].value)[0].firstName);
-
-                            $('#edit_worker_first_name').val(state.filter(dep => dep.department.toLowerCase() == current_page)[0].workers.filter(worker => worker.id == e.target.attributes[0].value)[0].firstName);
-                          
-                        });
                     });
+                });
 
 
+                (Array.from(document.querySelectorAll('table tr td button[del_id]'))).forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        state = state.map(dep => {
+                            if (dep.department.toLowerCase() == current_page) {
+                                return {
+                                    ...dep,
+                                    workers: dep.workers.filter(worker => {
+                                        if (worker.id != e.target.attributes[0].value) {
+                                            return worker;
+                                        }
+                                    })
+                                }
+                            } else {
+                                return dep;
+                            }
+                        })
+                        render(current_page)
+                    });
+                });
 
-                 }
             }
 
-            window.onpopstate = function(){
-                console.log('pop state');
+        }
+
+        function avarageSalary(depart){
+            var tmp = 0;
+            console.log(depart);
+            var salaries = depart.workers.map(worker => worker.salary);
+            salaries.forEach(salary => tmp += salary);
+
+            return Math.round(tmp/salaries.length);
+            //return data.filter(dep => dep.department.toLowerCase() == current_page).workers;
+        }
+
+
+        $('#add_department').click((e) => {
+            //adding new department
+            state.push({
+                id: state.length ? state[state.length - 1].id + 1 : 1,
+                department: $('#dep_name').val(),
+                description: $('#dep_description').val(),
+                head: $('#dep_head_name').val(),
+                workers: []
+            });
+
+            //clearing input fields
+            $('#dep_name, #dep_head_name, #dep_description').val('');
+
+            //navigation rebuilding
+            buildNavigation(state);
+            e.preventDefault();
+        })
+
+
+        $('#add_worker').click((e) => {
+            state = state.map(item => {
+                if(item.department.toLowerCase() == current_page){
+                    item.workers.push({
+                        id: item.workers.length ? item.workers[item.workers.length - 1].id + 1 : 1,
+                        firstName: $('#worker_first_name').val(),
+                        secondName: $('#worker_second_name').val(),
+                        date: $('#worker_date').val(),
+                        salary: +$('#worker_salary').val()
+                    })
+                    return item;
+                } else {
+                    return item;
+                }
+            });
+
+
+            $('#worker_first_name, #worker_second_name, #worker_date, #worker_salary').val('');
+            render(current_page);
+            e.preventDefault();
+        })
+
+        //save worker(edit)
+        $('#edit_worker').click(() => {
+            state = state.map(dep => {
+                if(dep.department.toLowerCase() == current_page){
+                    return {
+                        ...dep,
+                        workers: dep.workers.map(worker => {
+                            if(worker.id == current_item){
+                                return {
+                                    id:worker.id,
+                                    firstName:$('#edit_worker_first_name').val(),
+                                    secondName:$('#edit_worker_second_name').val(),
+                                    date:$('#edit_worker_date').val(),
+                                    salary: +$('#edit_worker_salary').val()
+                                }
+                            } else {
+                                return worker;
+                            }
+                        })
+                    }
+                } else {
+                    return dep;
+                }
+            })
+            render(current_page);
+        });
+
+        window.onpopstate = function(){
                 current_page = document.location.pathname.substring(1);
-                render(document.location.pathname.substring(1));
-            }
+                console.log(document.location.pathname.substring(1));
+                render(current_page);
+        }
 
-            window.onbeforeunload = function(){
-                window.history.pushState(
-                     {},
-                     '/',
-                     '/'
-                 );
-                 render('')
-            }()
-         }
+        window.onbeforeunload = function(){
+            window.history.pushState(
+                {},
+                '/',
+                '/'
+            );
+        }()
+
     </script>
 </body>
 </html>
