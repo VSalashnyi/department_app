@@ -24,7 +24,7 @@ function navigate(e) {
 function avarageSalary({ workers }){
     if(workers.length === 0) return 0;
     var salaries = workers.map(worker => worker.salary).reduce((accumulator, current) => current + accumulator);
-    return Math.round(salaries/workers.length) || 0;
+    return Math.round(salaries/workers.length);
 }
 
 function totalSalary({ workers }) {
@@ -42,11 +42,9 @@ function windowPushState(data){
     );
 }
 
-window.onpopstate = function(){
-    render(window.location.pathname);
+function generatePage(string) {
+    return $('#app').html('<div class="jumbotron"><h1 class="display-4">' + string + '</h1></div>');
 }
-
-
 
 //Building navigation
 function buildNavigation(data) {
@@ -100,6 +98,7 @@ function buildDeleteButton(data){
 }
 
 function buildContent(data){
+    if(data === undefined) $('#app').html('This page is not exist')
     $('#app').html(`
           <div class="jumbotron">
           <h3 class="display-4 d-inline">${data.department}</h3>
@@ -117,7 +116,6 @@ function buildContent(data){
 }
 
 function addListeners( { workers }){
-
     (Array.from(document.querySelectorAll('table tr td button[route]'))).forEach(btn => {
         btn.addEventListener('click', (e) => {
             current_item = e.target.attributes.route.value;
@@ -165,6 +163,8 @@ $('#add_department').click((e) => {
 
     //navigation rebuilding
     buildNavigation(state);
+    windowPushState(state[state.length - 1].id);
+    render(window.location.pathname);
     e.preventDefault();
 })
 
@@ -220,23 +220,20 @@ $('#edit_worker').click(() => {
 
 function render(param) {
     if (param === '/') {
-        $('#app').html('<div class="jumbotron">' +
-            '<h1 class="display-4">Choose department you are interesting in, or add your own.</h1>' +
-            '</div>');
-    } else if (param === '/edit-employer') {
-        $('#app').html('<div class="jumbotron">' +
-            '<h1 class="display-4">No department left. Add new department.</h1>' +
-            '</div>');
+        generatePage('Choose department you are interesting in, or add your own.')
+    } else if (param === '/no-dep') {
+        generatePage('No department left. Add new department.')
     } else if(param === '/add-employer'){
         console.log('you are on the page add-employer')
     } else {
-        current_department = state.filter(dep => dep.id === +param.substring(1))[0];
+        current_department = state.filter(dep => dep.id === +param.substring(1))[0] || undefined;
         buildContent(current_department)
     }
 }
 
-
-
+window.onpopstate = function(){
+    render(window.location.pathname);
+}
 
 
 
