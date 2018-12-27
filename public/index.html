@@ -9,48 +9,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 </head>
 <body>
-    <nav>
-
-    </nav>
-    <div id="app">
-
-    </div>
-
-    <!-- Modal -->
-    <div class="modal fade" id="departmentModal" tabindex="-1" role="dialog" aria-labelledby="departmentModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="departmentModalLabel">Add new department</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="form-group">
-                            <label for="dep_name">Name of department:</label>
-                            <input class="form-control" id="dep_name" placeholder="Enter the name of department...">
-                        </div>
-                        <div class="form-group">
-                            <label for="dep_head_name">Head name:</label>
-                            <input class="form-control" id="dep_head_name" placeholder="Enter the name of department head...">
-                        </div>
-                        <div class="form-group">
-                            <label for="dep_description">Department description:</label>
-                            <textarea name="" id="dep_description" placeholder="Enter the department description..." class="form-control" cols="30" rows="10"></textarea>
-                        </div>
-                        <!--<button type="submit" class="btn btn-primary">Submit</button>-->
-
-                        <div class="modal-footer">
-                            <button type="submit" id="add_department" data-dismiss="modal" class="btn btn-primary">Add</button>
-                        </div>
-                    </form>
-                </div>
-
-            </div>
-        </div>
-    </div>
+    <nav class="nav nav-dark"></nav>
+    <div id="app"></div>
 
     <div class="modal fade" id="workerModal" tabindex="-1" role="dialog" aria-labelledby="workerModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">

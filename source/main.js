@@ -17,7 +17,7 @@ function init(data) {
 }
 
 function navigate(e) {
-    windowPushState(e.target.attributes.route.value);
+    windowHistoryPushState(e.target.attributes.route.value);
     render(window.location.pathname);
 }
 
@@ -34,7 +34,7 @@ function totalSalary({ workers }) {
     return 0;
 }
 
-function windowPushState(data){
+function windowHistoryPushState(data){
     return window.history.pushState(
         {},
         data,
@@ -52,12 +52,18 @@ function buildNavigation(data) {
     data.forEach(chunk => {
         $('nav').append(`<button route="${chunk.id}" class="btn btn-secondary m-3">${chunk.department}</button>`);
     })
-    $('nav').append(`<button class="btn btn-warning m-3" id="add_dep" data-toggle="modal" data-target="#departmentModal">+</button>`);
+    $('nav').append(`<button class="btn btn-warning m-3" id="add_dep">Add new department</button>`);
+
+    $('#add_dep').click(() => {
+        windowHistoryPushState('/add-department');
+        render(window.location.pathname);
+    })
 
     Array.from(document.querySelectorAll('[route]')).forEach(btn => {
         btn.addEventListener('click', navigate, false);
     });
 }
+
 
 function buildTable({ workers }) {
     var table = $('<table/>').addClass('table');
@@ -80,25 +86,36 @@ function buildTable({ workers }) {
     return table;
 }
 
-function buildDeleteButton(data){
+function buildDeleteDepartmentButton(data){
     var button = $('<button/>').addClass('btn btn-danger ml-5 mb-3')
-        .text('Delete')
+        .text('Delete department')
         .click(() => {
             state = state.filter(item => item !== data);
             buildNavigation(state);
             if (state.length) {
-                windowPushState(state[state.length - 1].id);
+                windowHistoryPushState(state[state.length - 1].id);
                 render(window.location.pathname);
             } else {
-                windowPushState('no-dep');
+                windowHistoryPushState('no-dep');
                 render('/no-dep');
             }
         });
     return button;
 }
 
+function buildEditDepartmentButton(data){
+    var button = $('<button/>').addClass('btn btn-warning ml-5 mb-3')
+        .text('Edit department')
+        .click(() => {
+            windowHistoryPushState('edit-department');
+            render(window.location.pathname);
+
+        });
+    return button;
+}
+
 function buildContent(data){
-    if(data === undefined) $('#app').html('This page is not exist')
+    if(data === undefined) $('#app').html('This page does not exist');
     $('#app').html(`
           <div class="jumbotron">
           <h3 class="display-4 d-inline">${data.department}</h3>
@@ -110,7 +127,8 @@ function buildContent(data){
           <h4>Employers:</h4>
           <button class="btn btn-success" data-toggle="modal" data-target="#workerModal">Add New Worker</button>
          </div>`)
-        $('h3').after(buildDeleteButton(data));
+        $('h3').after(buildDeleteDepartmentButton(data));
+        $('h3').after(buildEditDepartmentButton(data));
         $('h4').after(buildTable(data));
         addListeners(data);
 }
@@ -146,29 +164,6 @@ function addListeners( { workers }){
         });
     });
 }
-
-//add department modal window button
-$('#add_department').click((e) => {
-    //adding new department
-    state.push({
-        id: state.length ? state[state.length - 1].id + 1 : 1,
-        department: $('#dep_name').val(),
-        description: $('#dep_description').val(),
-        head: $('#dep_head_name').val(),
-        workers: []
-    });
-
-    //clearing input fields
-    $('#dep_name, #dep_head_name, #dep_description').val('');
-
-    //navigation rebuilding
-    buildNavigation(state);
-    windowPushState(state[state.length - 1].id);
-    render(window.location.pathname);
-    e.preventDefault();
-})
-
-
 
 $('#add_worker').click((e) => {
     state = state.map(dep => {
@@ -225,46 +220,100 @@ function render(param) {
         generatePage('No department left. Add new department.')
     } else if(param === '/add-employer'){
         console.log('you are on the page add-employer')
+    }else if(param === '/add-department'){
+        $('#app').html(renderAddDepartmentForm())
+    }else if(param === '/edit-department'){
+        console.log(current_department);
+        $('#app').html(renderEditDepartmentForm())
     } else {
         current_department = state.filter(dep => dep.id === +param.substring(1))[0] || undefined;
         buildContent(current_department)
     }
 }
 
+function renderDepartmentForm(){
+    return $('#app').html(`
+        <div class="jumbotron w-50 m-auto">
+                <form>
+                    <label for="dep_name">Name of department:</label>
+                    <input class="form-control" id="dep_name" placeholder="Enter the name of department...">
+ 
+                    <label for="dep_head_name">Head name:</label>
+                    <input class="form-control" id="dep_head_name" placeholder="Enter the name of department head...">        
+                       
+                    <label for="dep_description">Department description:</label>
+                    <textarea name="" id="dep_description" placeholder="Enter the department description..." class="form-control" cols="30" rows="10"></textarea>
+                    <div class="department-modal-footer">
+ 
+                    </div>
+                </form>
+        </div>`);
+}
+
+function renderAddDepartmentForm() {
+    renderDepartmentForm();
+    var button = $('<button/>').attr('id', 'add-department')
+                                .text('Add new department')
+                                .addClass('btn btn-secondary float-right mt-2')
+                                .click((e) => {
+        //adding new department
+        state.push({
+            id: state.length ? state[state.length - 1].id + 1 : 1,
+            department: $('#dep_name').val(),
+            description: $('#dep_description').val(),
+            head: $('#dep_head_name').val(),
+            workers: []
+        });
+
+        //clearing input fields
+        $('#dep_name, #dep_head_name, #dep_description').val('');
+
+        //navigation rebuilding
+        buildNavigation(state);
+        windowHistoryPushState(state[state.length - 1].id);
+        render(window.location.pathname);
+        e.preventDefault();
+    });
+    $('.department-modal-footer').html($(button));
+}
+
+function renderEditDepartmentForm() {
+
+        renderDepartmentForm();
+        $('#dep_name').val(current_department.department);
+        $('#dep_head_name').val(current_department.head);
+        $('#dep_description').val(current_department.description);
+
+    var button = $('<button/>').attr('id', 'edit-department')
+        .text('Edit department')
+        .addClass('btn btn-secondary float-right mt-2')
+        .click((e) => {
+            // current department editing
+            state = state.map(dep => {
+                if(dep === current_department){
+                    return {
+                        id: dep.id,
+                        department: $('#dep_name').val(),
+                        head: $('#dep_head_name').val(),
+                        description: $('#dep_description').val(),
+                        workers: dep.workers
+                    }
+                } else {
+                    return dep;
+                }
+            })
+
+            $('#dep_name, #dep_head_name, #dep_description').val('');
+
+            //navigation rebuilding
+            buildNavigation(state);
+            windowHistoryPushState(current_department.id);
+            render(window.location.pathname);
+            e.preventDefault();
+        });
+    $('.department-modal-footer').html($(button));
+}
+
 window.onpopstate = function(){
     render(window.location.pathname);
 }
-
-
-
-// window.onbeforeunload = function(){
-//     window.history.pushState(
-//         {},
-//         '/',
-//         '/'
-//     );
-// }()
-
-
-// window.onload = function(){
-//     console.log('fdfdfdsfs');
-// }
-
-// var routes = {
-//     '/': homePage,
-//     '/portfolio': portfolioPage,
-//     '/resume': resumePage,
-//     '/contact': contactPage,
-// };
-//     var router = {
-//         routes: [{
-//             path: '/',
-//             name: 'Root',
-//         },
-//         {
-//             path: '/about',
-//             name: 'About'
-//         }]
-//     }
-//
-//     console.log(router)
