@@ -1,13 +1,15 @@
 var express = require('express');
 var app = express();
-var morgan = require('morgan');
+//  var morgan = require('morgan');
 
 
-app.use(morgan('dev'));
+app.use(express.static('public'))
+app.use(express.static('source'))
 
 
 app.get('*', function(req, res) {
-    res.sendfile(__dirname + '/public/index.html');
+   res.sendFile(__dirname + '/public/index.html');
+    //res.sendFile(__dirname + '/source/main.js');
 });
 
-app.listen(8080);
+app.listen(3001);
