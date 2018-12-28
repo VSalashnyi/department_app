@@ -130,53 +130,57 @@ function buildTable({employers}) {
   if (employers.length === 0) {
     table.append("You have not any employers");
   } else {
-    employers.forEach(employer => {
-      table.append(`<tr>
-                        <td>${employer.firstName}</td>
-                        <td>${employer.secondName}</td>
-                        <td>${employer.date}</td>
-                        <td>${employer.salary}</td>
-                        <td id="buttons">
-                            <button route="${employer.id}" class="btn btn-warning" >Edit</button>
-                            <button del_id="${employer.id}" class="btn btn-danger">Delete</button>
-                         </td>
-                   </tr>`)
-      })
+    employers.forEach(emploee => {
+      table.append(renderTableRow(emploee))})
   }
     return table;
 }
 
-//-----------------------------------------------------------
-function addListeners({employers}) {
-    (Array.from(document.querySelectorAll('table tr td button[route]'))).forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            current_employer = employers.filter(employer => employer.id === +e.target.attributes.route.value)[0];
-            windowHistoryPushState('edit-employer');
-            render(window.location.pathname);
-        });
+function renderTableRow(emploee){
+    var row = $('<tr>');
+    $('<td>').html(emploee.firstName).appendTo(row);
+    $('<td>').html(emploee.secondName).appendTo(row);
+    $('<td>').html(emploee.date).appendTo(row);
+    $('<td>').html(emploee.salary).appendTo(row);
+    renderButton('Edit', 'btn btn-warning', "row)",() => {
+        current_employer = emploee;
+        windowHistoryPushState('edit-employer');
+        render(window.location.pathname);
     });
-
-//---------------------------------------------------------------------------------
-    (Array.from(document.querySelectorAll('table tr td button[del_id]'))).forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            state = state.map(dep => {
-                if (dep === current_department) {
-                    return {
-                        ...dep,
-                        employers: employers.filter(employer => {
-                            if (employer.id != e.target.attributes.del_id.value) {
-                                return employer;
-                            }
-                        })
-                    }
-                } else {
-                    return dep;
-                }
-            })
-            render(window.location.pathname)
-        });
-    });
+    return row;
 }
+
+//-----------------------------------------------------------
+// function addListeners({employers}) {
+//     (Array.from(document.querySelectorAll('table tr td button[route]'))).forEach(btn => {
+//         btn.addEventListener('click', (e) => {
+//             current_employer = employers.filter(employer => employer.id === +e.target.attributes.route.value)[0];
+//             windowHistoryPushState('edit-employer');
+//             render(window.location.pathname);
+//         });
+//     });
+//
+// //---------------------------------------------------------------------------------
+//     (Array.from(document.querySelectorAll('table tr td button[del_id]'))).forEach(btn => {
+//         btn.addEventListener('click', (e) => {
+//             state = state.map(dep => {
+//                 if (dep === current_department) {
+//                     return {
+//                         ...dep,
+//                         employers: employers.filter(employer => {
+//                             if (employer.id != e.target.attributes.del_id.value) {
+//                                 return employer;
+//                             }
+//                         })
+//                     }
+//                 } else {
+//                     return dep;
+//                 }
+//             })
+//             render(window.location.pathname)
+//         });
+//     });
+// }
 
 
 function renderButton(buttonTitle, buttonClass, appendPlace, callBack) {
