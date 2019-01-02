@@ -48,14 +48,16 @@ function totalSalary({ employees }) {
 }
 
 function getList(){
-    var list = '<p>Employees with salary lower than average in the department:<ul>';
-    current_department.employees.forEach(employee => {
-        if(employee.salary < averageSalary(current_department)){
-            list += `<li>${employee.firstName} ${employee.secondName}</li>`
-        }
-    })
-    list += '</ul></p>';
-    return list;
+  var count = 0,
+      list = '<p>Employees with salary lower than average in the department:<ul>';
+  current_department.employees.forEach(employee => {
+    if(employee.salary < averageSalary(current_department)){
+        list += `<li>${employee.firstName} ${employee.secondName}</li>`;
+        count++;
+      }
+    });
+  list += '</ul></p>';
+  if(count) return list;
 }
 
 function windowHistoryPushState(data){
@@ -126,7 +128,7 @@ function buildContent() {
         windowHistoryPushState('add-employee');
         render(window.location.pathname);
        });
-      $('#app').html(div)
+      $('#app').html(div);
   }
 }
 
@@ -137,7 +139,7 @@ function buildTable({employees}) {
   } else {
       employees.forEach(employee => {
          table.append(renderTableRow(employee))
-      })
+      });
   }
     return table;
 }
@@ -172,7 +174,7 @@ function renderTableRow(employee){
     windowHistoryPushState('edit-employee');
     render(window.location.pathname);
   });
-    return row;
+  return row;
 }
 
 function renderButton(buttonTitle, buttonClass, appendPlace, callBack) {
@@ -246,27 +248,26 @@ function renderEditDepartmentForm() {
   $('#dep_description').val(current_department.description);
 
   renderButton('Edit department', 'btn btn-secondary float-right mt-2', 'form', () => {
-      // current department editing
-      state = state.map(dep => {
-          if(dep === current_department){
-              return {
-                  id: dep.id,
-                  department_title: $('#dep_name').val(),
-                  head: $('#dep_head_name').val(),
-                  description: $('#dep_description').val(),
-                  employees: dep.employees
-              }
-          } else {
-              return dep;
-          }
-      })
+    // current department editing
+    state = state.map(dep => {
+      if(dep === current_department){
+        return {
+          id: dep.id,
+          department_title: $('#dep_name').val(),
+          head: $('#dep_head_name').val(),
+          description: $('#dep_description').val(),
+          employees: dep.employees
+        }
+      } else {
+        return dep;
+      }
+    })
 
-      $('#dep_name, #dep_head_name, #dep_description').val('');
-
-      //navigation rebuilding
-      buildNavigation(state);
-      windowHistoryPushState(current_department.id);
-      render(window.location.pathname);
+    $('#dep_name, #dep_head_name, #dep_description').val('');
+    //navigation rebuilding
+    buildNavigation(state);
+    windowHistoryPushState(current_department.id);
+    render(window.location.pathname);
   });
 }
 
