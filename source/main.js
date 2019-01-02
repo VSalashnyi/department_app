@@ -1,18 +1,10 @@
-var state,
+let state,
   current_department,
   current_employee;
-  Route = {
-    '/' : () => buildPage('Choose department you are interesting in, or add your own.'),
-    '/no-dep' : () => buildPage('No department left. Add new department.'),
-    '/add-employee': renderAddEmployeeForm,
-    '/edit-employee': renderEditEmployeeForm,
-    '/add-department': renderAddDepartmentForm,
-    '/edit-department': renderEditDepartmentForm
-  };
 
 window.onload = function() {
   //fetching data
-  fetch('http://www.mocky.io/v2/5c2c7a402e0000070ae87586')
+  fetch('http://www.mocky.io/v2/5c2ce2ee2e00004e06e877f1')
   .then(res => res.json())
   .then(data => {
     if(JSON.parse(sessionStorage.getItem('state')) === null) {
@@ -23,32 +15,33 @@ window.onload = function() {
   });
 }
 
-function init(data) {
+const init = (data) => {
   state = data;
   buildNavigation(data);
   render(window.location.pathname);
 }
 
-function navigate(route) {
+const navigate = (route) => {
   windowHistoryPushState(route);
   render(window.location.pathname);
 }
 
-function averageSalary({ employees }){
+const averageSalary = ({ employees }) => {
   if(employees.length === 0) return 0;
-  var salaries = employees.map(employee => employee.salary).reduce((accumulator, current) => current + accumulator);
+  let salaries = employees.map(employee => employee.salary).reduce((accumulator, current) => current + accumulator);
   return Math.round(salaries/employees.length);
 }
 
-function totalSalary({ employees }) {
+const totalSalary = ({ employees }) => {
   if (employees.map(employee => employee.salary).length) {
     return employees.map(employee => employee.salary).reduce((accumulator, current) => current + accumulator);
-  }
+  } else {
     return 0;
+  }
 }
 
-function getList(){
-  var count = 0,
+const getList = () => {
+  let count = 0,
       list = '<p>Employees with salary lower than average in the department:<ul>';
   current_department.employees.forEach(employee => {
     if(employee.salary < averageSalary(current_department)){
@@ -60,7 +53,7 @@ function getList(){
   if(count) return list;
 }
 
-function windowHistoryPushState(data){
+const windowHistoryPushState = (data) => {
    window.history.pushState(
   {},
     data,
@@ -68,7 +61,7 @@ function windowHistoryPushState(data){
   );
 }
 
-function render(param) {
+const render = (param) => {
   if(Route[param]){
       Route[param]();
   } else {
@@ -77,12 +70,12 @@ function render(param) {
   }
 }
 
-function buildPage(string) {
+const buildPage = (string) => {
   $('#app').html('<div class="jumbotron"><h1 class="display-4">' + string + '</h1></div>');
 }
 
 //Building navigation
-function buildNavigation(data) {
+const buildNavigation = (data) => {
   $('nav').empty();
 
   data.forEach(dep => {
@@ -95,7 +88,7 @@ function buildNavigation(data) {
   })
 }
 
-function buildContent() {
+const buildContent = () => {
   if (current_department === undefined) {
     $('#app').html('This page does not exist');
   } else {
@@ -132,7 +125,7 @@ function buildContent() {
   }
 }
 
-function buildTable({employees}) {
+const buildTable = ({employees}) => {
   var table = $('<table/>').addClass('table');
   if (employees.length === 0) {
     table.append('You have not any employees');
@@ -144,7 +137,7 @@ function buildTable({employees}) {
     return table;
 }
 
-function renderTableRow(employee){
+const renderTableRow = (employee) => {
   var row = $('<tr>');
   $('<td>').html(employee.firstName).appendTo(row);
   $('<td>').html(employee.secondName).appendTo(row);
@@ -177,41 +170,41 @@ function renderTableRow(employee){
   return row;
 }
 
-function renderButton(buttonTitle, buttonClass, appendPlace, callBack) {
-    var button = $('<button/>')
-        .text(buttonTitle)
-        .addClass(buttonClass)
-        .click(callBack);
-    $(appendPlace).append($(button));
+const renderButton = (buttonTitle, buttonClass, appendPlace, callBack) => {
+  let button = $('<button/>')
+    .text(buttonTitle)
+    .addClass(buttonClass)
+    .click(callBack);
+  $(appendPlace).append($(button));
 }
 
-function renderInputField (id, title, placeholder, type, appendPlace){
-  var field = $('<div/>');
+const renderInputField = (id, title, placeholder, type, appendPlace) => {
+  let field = $('<div/>');
     $('<label/>').attr('for', id).text(title).appendTo(field);
     $('<input/>').attr('id', id).attr('placeholder', placeholder).attr('type', type).addClass('form-control').appendTo(field);
-    return field.appendTo(appendPlace);
+  return field.appendTo(appendPlace);
 }
 
-function renderTextareaField (id, title, placeholder, type, appendPlace){
-  var field = $('<div/>');
+const renderTextareaField = (id, title, placeholder, type, appendPlace) => {
+  let field = $('<div/>');
     $('<label/>').attr('for', id).text(title).appendTo(field);
     $('<textarea/>').attr('id', id).attr('placeholder', placeholder).attr('type', type).addClass('form-control').appendTo(field);
-    return field.appendTo(appendPlace);
+  return field.appendTo(appendPlace);
 
 }
 
-function renderDepartmentForm(){
-  var div = $('<div/>').addClass('jumbotron w-50 m-auto');
-  var form = $('<form/>').appendTo(div);
+const renderDepartmentForm = () => {
+  let div = $('<div/>').addClass('jumbotron w-50 m-auto');
+  let form = $('<form/>').appendTo(div);
    renderInputField('dep_name', 'Department label', 'Enter the name of department...', 'text', form);
    renderInputField('dep_head_name', 'Department head name:', 'Enter the name of the head of department...', 'text', form);
    renderTextareaField('dep_description', 'Department description:', 'Enter the department description...', 'text', form);
   $('#app').html(div);
 }
 
-function renderEmployeeForm(){
-    var div = $('<div/>').addClass('jumbotron w-50 m-auto');
-    var form = $('<form/>').appendTo(div);
+const renderEmployeeForm = () => {
+    let div = $('<div/>').addClass('jumbotron w-50 m-auto');
+    let form = $('<form/>').appendTo(div);
     renderInputField('employee_first_name', 'Employee first name', 'Enter employee first name...', 'text', form);
     renderInputField('employee_second_name', 'Employee second name:', 'Enter employee second name...', 'text', form);
     renderInputField('employee_date', 'Employee birth date:', 'Enter employee\'s date of birth...', 'date', form);
@@ -219,8 +212,7 @@ function renderEmployeeForm(){
     $('#app').html(div);
 }
 
-
-function renderAddDepartmentForm() {
+const renderAddDepartmentForm = () => {
   renderDepartmentForm();
   renderButton('Add new department','btn btn-secondary float-right mt-2' , 'form', () => {
       //adding new department
@@ -241,7 +233,7 @@ function renderAddDepartmentForm() {
   });
 }
 
-function renderEditDepartmentForm() {
+const renderEditDepartmentForm = () => {
   renderDepartmentForm();
   $('#dep_name').val(current_department.department_title);
   $('#dep_head_name').val(current_department.head);
@@ -271,7 +263,7 @@ function renderEditDepartmentForm() {
   });
 }
 
-function renderEditEmployeeForm(){
+const renderEditEmployeeForm = () => {
   renderEmployeeForm();
   $('#employee_first_name').val(current_employee.firstName);
   $('#employee_second_name').val(current_employee.secondName);
@@ -308,7 +300,7 @@ function renderEditEmployeeForm(){
   });
 }
 
-function renderAddEmployeeForm() {
+const renderAddEmployeeForm = () => {
   renderEmployeeForm();
   renderButton('Add New Employee','btn btn-secondary float-right mt-3', 'form', () => {
     state = state.map(dep => {
@@ -333,10 +325,19 @@ function renderAddEmployeeForm() {
   });
 }
 
-window.onpopstate = function(){
+window.onpopstate = () => {
   render(window.location.pathname);
 }
 
-window.onbeforeunload = function(){
+window.onbeforeunload = () => {
   sessionStorage.setItem('state', JSON.stringify(state));
 }
+
+let Route = {
+    '/' : () => buildPage('Choose department you are interesting in, or add your own.'),
+    '/no-dep' : () => buildPage('No department left. Add new department.'),
+    '/add-employee': renderAddEmployeeForm,
+    '/edit-employee': renderEditEmployeeForm,
+    '/add-department': renderAddDepartmentForm,
+    '/edit-department': renderEditDepartmentForm
+};
