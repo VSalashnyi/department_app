@@ -1,13 +1,13 @@
 var state,
   current_department,
   current_employee;
-  Map = {
+  Route = {
     '/' : () => buildPage('Choose department you are interesting in, or add your own.'),
     '/no-dep' : () => buildPage('No department left. Add new department.'),
-    '/add-employee': () => $('#app').html(renderAddEmployeeForm()),
-    '/edit-employee': () => $('#app').html(renderEditEmployeeForm()),
-    '/add-department': () => $('#app').html(renderAddDepartmentForm()),
-    '/edit-department': () => $('#app').html(renderEditDepartmentForm())
+    '/add-employee': renderAddEmployeeForm,
+    '/edit-employee': renderEditEmployeeForm,
+    '/add-department': renderAddDepartmentForm,
+    '/edit-department': renderEditDepartmentForm
   };
 
 window.onload = function() {
@@ -22,7 +22,6 @@ window.onload = function() {
     }
   });
 }
-
 
 function init(data) {
   state = data;
@@ -49,13 +48,13 @@ function totalSalary({ employees }) {
 }
 
 function getList(){
-    var list = '<ul>';
+    var list = '<p>Employees with salary lower than average in the department:<ul>';
     current_department.employees.forEach(employee => {
         if(employee.salary < averageSalary(current_department)){
-            list += `<li>${employee.firstName}</li>`
+            list += `<li>${employee.firstName} ${employee.secondName}</li>`
         }
     })
-    list += '</ul>';
+    list += '</ul></p>';
     return list;
 }
 
@@ -68,8 +67,8 @@ function windowHistoryPushState(data){
 }
 
 function render(param) {
-  if(Map[param]){
-      Map[param]();
+  if(Route[param]){
+      Route[param]();
   } else {
     current_department = state.filter(dep => dep.id === +param.substring(1))[0];
     buildContent();
@@ -85,7 +84,7 @@ function buildNavigation(data) {
   $('nav').empty();
 
   data.forEach(dep => {
-    renderButton(`${dep.department_title}`, 'btn btn-secondary m-3', 'nav',() => navigate(dep.id))
+    renderButton(dep.department_title, 'btn btn-secondary m-3', 'nav',() => navigate(dep.id))
   });
 
   renderButton('Add new department', 'btn btn-success m-3', 'nav',() => {
@@ -101,7 +100,7 @@ function buildContent() {
         $('#app').html(`
     <div class="jumbotron">
       <h3 class="display-4 d-inline">${current_department.department_title}</h3>
-      <p>Head of department_title - <b>${current_department.head}</b></p>
+      <p>Head of department - <b>${current_department.head}</b></p>
       <p>Average salary : ${averageSalary(current_department)}</p>
       <p>Total salary : ${totalSalary(current_department)}</p>
       ${getList()}
@@ -119,7 +118,7 @@ function buildContent() {
             windowHistoryPushState('no-dep');
             render('/no-dep');
         }
-      });
+    });
 
     renderButton('Edit department', 'btn btn-warning ml-5 mb-3', 'h3', () => {
       windowHistoryPushState('edit-department');
@@ -188,49 +187,44 @@ function renderButton(buttonTitle, buttonClass, appendPlace, callBack) {
     $(appendPlace).append($(button));
 }
 
-function renderDepartmentForm(){
-  $('#app').html(`
-    <div class="jumbotron w-50 m-auto">
-      <form>
-        <label for="dep_name">Department label:</label>
-        <input class="form-control" id="dep_name" placeholder="Enter the name of department...">
 
-         <label for="dep_head_name">Head name:</label>
-         <input class="form-control" id="dep_head_name" placeholder="Enter the name of department head...">        
-                       
-         <label for="dep_description">Department description:</label>
-         <textarea name="" id="dep_description" placeholder="Enter the department description..." class="form-control" cols="30" rows="10"></textarea>
-                    
-         <div class="department-modal-footer"></div>
-      </form>
-    </div>`);
+function renderInputField (id, title, placeholder, type){
+  var field = $('<div/>');
+    $('<label/>').attr('for', id).text(title).appendTo(field);
+    $('<input/>').attr('id', id).attr('placeholder', placeholder).attr('type', type).addClass('form-control').appendTo(field);
+    return field;
+
+}
+
+function renderTextareaField (id, title, placeholder, type){
+  var field = $('<div/>');
+    $('<label/>').attr('for', id).text(title).appendTo(field);
+    $('<textarea/>').attr('id', id).attr('placeholder', placeholder).attr('type', type).addClass('form-control').appendTo(field);
+    return field;
+
+}
+
+function renderDepartmentForm(){
+  var div = $('<div/>').addClass('jumbotron w-50 m-auto');
+  var form = $('<form/>').appendTo(div);
+   renderInputField('dep_name', 'Department label', 'Enter the name of department...', 'text').appendTo(form);
+   renderInputField('dep_head_name', 'Department head name:', 'Enter the name of the head of department...', 'text').appendTo(form);
+   renderTextareaField('dep_description', 'Department description:', 'Enter the department description...', 'text').appendTo(form);
+   $(form).append('<div class="department-modal-footer"></div>')
+  $('#app').html(div);
 }
 
 function renderEmployeeForm(){
-  $('#app').html(`
-    <div class='jumbotron w-50 m-auto'>
-      <form>
-        <label for="employee_first_name">Employee first name:</label>
-        <input class="form-control" id="employee_first_name" placeholder="Enter employee first name...">
-        
-        <label for="employee_second_name">Employee second name:</label>
-        <input class="form-control" id="employee_second_name" placeholder="Enter employee second name...">
-
-        <label for="employee_date">Employee birth date:</label>
-        <input class="form-control" type="date" id="employee_date" placeholder="Enter employee's date of birth...">
-                
-        <label for="employee_salary">Employee salary:</label>
-        <input class="form-control" type="number" id="employee_salary" placeholder="Enter employee's salary...">
-                
-        <div class="department-modal-footer"></div>
-      </form>
-    </div>`);
+    var div = $('<div/>').addClass('jumbotron w-50 m-auto');
+    var form = $('<form/>').appendTo(div);
+    renderInputField('employee_first_name', 'Employee first name', 'Enter employee first name...', 'text').appendTo(form);
+    renderInputField('employee_second_name', 'Employee second name:', 'Enter employee second name...', 'text').appendTo(form);
+    renderInputField('employee_date', 'Employee birth date:', 'Enter employee\'s date of birth...', 'date').appendTo(form);
+    renderInputField('employee_salary', 'Employee salary:', 'Enter employee\'s salary...', 'number').appendTo(form);
+    $(form).append('<div class="department-modal-footer"></div>')
+    $('#app').html(div);
 }
 
-// function renderInputField (id, title, placeholder, type = 'text'){
-//     return `<label for=${id}>${title}</label>
-//             <input class="form-control" type="${type}" id=${id} placeholder = ${placeholder}>`
-// }
 
 function renderAddDepartmentForm() {
   renderDepartmentForm();
