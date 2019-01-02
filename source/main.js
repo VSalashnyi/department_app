@@ -94,43 +94,39 @@ function buildNavigation(data) {
 }
 
 function buildContent() {
-    if (current_department === undefined) {
-        $('#app').html('This page does not exist');
-    } else {
-        $('#app').html(`
-    <div class="jumbotron">
-      <h3 class="display-4 d-inline">${current_department.department_title}</h3>
-      <p>Head of department - <b>${current_department.head}</b></p>
-      <p>Average salary : ${averageSalary(current_department)}</p>
-      <p>Total salary : ${totalSalary(current_department)}</p>
-      ${getList()}
-      <hr/>
-      <p>${current_department.description}</p>
-      <h4>Employees:</h4> 
-    </div>`);
-    renderButton('Delete department', 'btn btn-danger ml-5 mb-3', 'h3', () => {
-      state = state.filter(item => item !== current_department);
+  if (current_department === undefined) {
+    $('#app').html('This page does not exist');
+  } else {
+    var div = $('<div/>').addClass('jumbotron');
+      $('<h3/>').addClass('display-4 d-inline').text(current_department.department_title).appendTo(div);
+      renderButton('Delete department', 'btn btn-danger ml-5 mb-3', div, () => {
+        state = state.filter(item => item !== current_department);
         buildNavigation(state);
         if (state.length) {
-            windowHistoryPushState(state[state.length - 1].id);
-            render(window.location.pathname);
+          windowHistoryPushState(state[state.length - 1].id);
+          render(window.location.pathname);
         } else {
-            windowHistoryPushState('no-dep');
-            render('/no-dep');
+          windowHistoryPushState('no-dep');
+          render('/no-dep');
         }
-    });
-
-    renderButton('Edit department', 'btn btn-warning ml-5 mb-3', 'h3', () => {
-      windowHistoryPushState('edit-department');
-      render(window.location.pathname);
-    });
-
-    renderButton('Add New Employee', 'btn btn-success', '.jumbotron', () => {
+      });
+      renderButton('Edit department', 'btn btn-warning ml-5 mb-3', div, () => {
+        windowHistoryPushState('edit-department');
+        render(window.location.pathname);
+      });
+      $('<p/>').html('Head of department - ' + '<b>' + current_department.head + '</b>').appendTo(div);
+      $('<p/>').html('Average salary : ' + averageSalary(current_department)).appendTo(div);
+      $('<p/>').html('Total salary : ' + totalSalary(current_department)).appendTo(div);
+      $('<p/>').html(getList()).appendTo(div);
+      $('<hr/>').appendTo(div);
+      $('<p/>').html(current_department.description).appendTo(div);
+      $('<h4/>').html('Employees:').appendTo(div);
+      buildTable(current_department).appendTo(div);
+      renderButton('Add New Employee', 'btn btn-success', div, () => {
         windowHistoryPushState('add-employee');
         render(window.location.pathname);
-    });
-
-    $('h4').after(buildTable(current_department));
+       });
+      $('#app').html(div)
   }
 }
 
@@ -168,7 +164,7 @@ function renderTableRow(employee){
         return dep;
         }
      })
-      render(window.location.pathname)
+      render(window.location.pathname);
     });
 
   renderButton('Edit', 'btn btn-warning mr-2', row,() => {
@@ -187,48 +183,44 @@ function renderButton(buttonTitle, buttonClass, appendPlace, callBack) {
     $(appendPlace).append($(button));
 }
 
-
-function renderInputField (id, title, placeholder, type){
+function renderInputField (id, title, placeholder, type, appendPlace){
   var field = $('<div/>');
     $('<label/>').attr('for', id).text(title).appendTo(field);
     $('<input/>').attr('id', id).attr('placeholder', placeholder).attr('type', type).addClass('form-control').appendTo(field);
-    return field;
-
+    return field.appendTo(appendPlace);
 }
 
-function renderTextareaField (id, title, placeholder, type){
+function renderTextareaField (id, title, placeholder, type, appendPlace){
   var field = $('<div/>');
     $('<label/>').attr('for', id).text(title).appendTo(field);
     $('<textarea/>').attr('id', id).attr('placeholder', placeholder).attr('type', type).addClass('form-control').appendTo(field);
-    return field;
+    return field.appendTo(appendPlace);
 
 }
 
 function renderDepartmentForm(){
   var div = $('<div/>').addClass('jumbotron w-50 m-auto');
   var form = $('<form/>').appendTo(div);
-   renderInputField('dep_name', 'Department label', 'Enter the name of department...', 'text').appendTo(form);
-   renderInputField('dep_head_name', 'Department head name:', 'Enter the name of the head of department...', 'text').appendTo(form);
-   renderTextareaField('dep_description', 'Department description:', 'Enter the department description...', 'text').appendTo(form);
-   $(form).append('<div class="department-modal-footer"></div>')
+   renderInputField('dep_name', 'Department label', 'Enter the name of department...', 'text', form);
+   renderInputField('dep_head_name', 'Department head name:', 'Enter the name of the head of department...', 'text', form);
+   renderTextareaField('dep_description', 'Department description:', 'Enter the department description...', 'text', form);
   $('#app').html(div);
 }
 
 function renderEmployeeForm(){
     var div = $('<div/>').addClass('jumbotron w-50 m-auto');
     var form = $('<form/>').appendTo(div);
-    renderInputField('employee_first_name', 'Employee first name', 'Enter employee first name...', 'text').appendTo(form);
-    renderInputField('employee_second_name', 'Employee second name:', 'Enter employee second name...', 'text').appendTo(form);
-    renderInputField('employee_date', 'Employee birth date:', 'Enter employee\'s date of birth...', 'date').appendTo(form);
-    renderInputField('employee_salary', 'Employee salary:', 'Enter employee\'s salary...', 'number').appendTo(form);
-    $(form).append('<div class="department-modal-footer"></div>')
+    renderInputField('employee_first_name', 'Employee first name', 'Enter employee first name...', 'text', form);
+    renderInputField('employee_second_name', 'Employee second name:', 'Enter employee second name...', 'text', form);
+    renderInputField('employee_date', 'Employee birth date:', 'Enter employee\'s date of birth...', 'date', form);
+    renderInputField('employee_salary', 'Employee salary:', 'Enter employee\'s salary...', 'number', form);
     $('#app').html(div);
 }
 
 
 function renderAddDepartmentForm() {
   renderDepartmentForm();
-  renderButton('Add new department','btn btn-secondary float-right mt-2' , '.department-modal-footer', () => {
+  renderButton('Add new department','btn btn-secondary float-right mt-2' , 'form', () => {
       //adding new department
       state.push({
           id: state.length ? state[state.length - 1].id + 1 : 1,
@@ -253,7 +245,7 @@ function renderEditDepartmentForm() {
   $('#dep_head_name').val(current_department.head);
   $('#dep_description').val(current_department.description);
 
-  renderButton('Edit department', 'btn btn-secondary float-right mt-2', '.department-modal-footer', () => {
+  renderButton('Edit department', 'btn btn-secondary float-right mt-2', 'form', () => {
       // current department editing
       state = state.map(dep => {
           if(dep === current_department){
@@ -285,7 +277,7 @@ function renderEditEmployeeForm(){
   $('#employee_date').val(current_employee.date);
   $('#employee_salary').val(current_employee.salary);
 
-  renderButton('Edit employee', 'btn btn-secondary float-right mt-3', '.department-modal-footer',() => {
+  renderButton('Edit employee', 'btn btn-secondary float-right mt-3', 'form',() => {
     state = state.map(dep => {
       if(dep === current_department){
         return {
@@ -317,7 +309,7 @@ function renderEditEmployeeForm(){
 
 function renderAddEmployeeForm() {
   renderEmployeeForm();
-  renderButton('Add New Employee','btn btn-secondary float-right mt-3', '.department-modal-footer', () => {
+  renderButton('Add New Employee','btn btn-secondary float-right mt-3', 'form', () => {
     state = state.map(dep => {
     if(dep === current_department){
        dep.employees.push({
