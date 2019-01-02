@@ -48,6 +48,17 @@ function totalSalary({ employees }) {
     return 0;
 }
 
+function getList(){
+    var list = '<ul>';
+    current_department.employees.forEach(employee => {
+        if(employee.salary < averageSalary(current_department)){
+            list += `<li>${employee.firstName}</li>`
+        }
+    })
+    list += '</ul>';
+    return list;
+}
+
 function windowHistoryPushState(data){
    window.history.pushState(
   {},
@@ -77,7 +88,7 @@ function buildNavigation(data) {
     renderButton(`${dep.department_title}`, 'btn btn-secondary m-3', 'nav',() => navigate(dep.id))
   });
 
-  renderButton('Add new department', 'btn btn-warning m-3', 'nav',() => {
+  renderButton('Add new department', 'btn btn-success m-3', 'nav',() => {
     windowHistoryPushState('/add-department');
     render(window.location.pathname);
   })
@@ -93,11 +104,11 @@ function buildContent() {
       <p>Head of department_title - <b>${current_department.head}</b></p>
       <p>Average salary : ${averageSalary(current_department)}</p>
       <p>Total salary : ${totalSalary(current_department)}</p>
+      ${getList()}
       <hr/>
       <p>${current_department.description}</p>
-      <h4>employees:</h4> 
+      <h4>Employees:</h4> 
     </div>`);
-
     renderButton('Delete department', 'btn btn-danger ml-5 mb-3', 'h3', () => {
       state = state.filter(item => item !== current_department);
         buildNavigation(state);
@@ -137,33 +148,35 @@ function buildTable({employees}) {
 }
 
 function renderTableRow(employee){
-    var row = $('<tr>');
-    $('<td>').html(employee.firstName).appendTo(row);
-    $('<td>').html(employee.secondName).appendTo(row);
-    $('<td>').html(employee.date).appendTo(row);
-    $('<td>').html(employee.salary).appendTo(row);
-    renderButton('Edit', 'btn btn-warning mr-2', row,() => {
-        current_employee = employee;
-        windowHistoryPushState('edit-employee');
-        render(window.location.pathname);
-    });
-    renderButton('Delete', 'btn btn-danger', row,() => {
-            state = state.map(dep => {
-                if (dep === current_department) {
-                    return {
-                        ...dep,
-                        employees: dep.employees.filter(employee => {
-                            if (employee !== employee) {
-                                return employee;
-                            }
-                        })
-                    }
-                } else {
-                    return dep;
+  var row = $('<tr>');
+  $('<td>').html(employee.firstName).appendTo(row);
+  $('<td>').html(employee.secondName).appendTo(row);
+  $('<td>').html(employee.date).appendTo(row);
+  $('<td>').html(employee.salary).appendTo(row);
+
+  renderButton('Delete', 'btn btn-danger', row,() => {
+    state = state.map(dep => {
+      if (dep === current_department) {
+        return {
+          ...dep,
+          employees: dep.employees.filter(emploee => {
+            if (emploee !== employee) {
+              return emploee;
                 }
-            })
-            render(window.location.pathname)
-        });
+             })
+          }
+      } else {
+        return dep;
+        }
+     })
+      render(window.location.pathname)
+    });
+
+  renderButton('Edit', 'btn btn-warning mr-2', row,() => {
+    current_employee = employee;
+    windowHistoryPushState('edit-employee');
+    render(window.location.pathname);
+  });
     return row;
 }
 
