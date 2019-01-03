@@ -2,7 +2,7 @@ let state,
   current_department,
   current_employee;
 
-window.onload = function() {
+window.onload = () =>  {
   //fetching data
   fetch('http://www.mocky.io/v2/5c2ce2ee2e00004e06e877f1')
   .then(res => res.json())
