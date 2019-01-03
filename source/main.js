@@ -26,31 +26,37 @@ const navigate = (route) => {
   render(window.location.pathname);
 }
 
-const averageSalary = ({ employees }) => {
-  if(employees.length === 0) return 0;
-  let salaries = employees.map(employee => employee.salary).reduce((accumulator, current) => current + accumulator);
-  return Math.round(salaries/employees.length);
+const averageSalary = ({employees}) => {
+  if(employees.length === 0){
+    return 0;
+  } else {
+    return Math.round(getSalary(employees) / employees.length);
+  }
 }
 
-const totalSalary = ({ employees }) => {
-  if (employees.map(employee => employee.salary).length) {
-    return employees.map(employee => employee.salary).reduce((accumulator, current) => current + accumulator);
+const totalSalary = ({employees}) => {
+  if (employees.length) {
+    return getSalary(employees);
   } else {
     return 0;
   }
 }
 
+const getSalary = (employees) => {
+  return employees.map(employee => employee.salary).reduce((accumulator, current) => current + accumulator);
+}
+
 const getList = () => {
   let count = 0,
-      list = '<p>Employees with salary lower than average in the department:<ul>';
-  current_department.employees.forEach(employee => {
-    if(employee.salary < averageSalary(current_department)){
-        list += `<li>${employee.firstName} ${employee.secondName}</li>`;
-        count++;
-      }
-    });
-  list += '</ul></p>';
-  if(count) return list;
+  paragraph = $('<p/>').html('Employees with salary lower than average in the department:'),
+  list = $('<ul>');
+  current_department.employees.forEach(function (employee) {
+    if(employee.salary < averageSalary(current_department.employees)) {
+      list.append($('<li>').text(`${employee.firstName} ${employee.secondName}`));
+      count++;
+    }
+  });
+  if(count) return paragraph.append(list);
 }
 
 const windowHistoryPushState = (data) => {
@@ -63,15 +69,15 @@ const windowHistoryPushState = (data) => {
 
 const render = (param) => {
   if(Route[param]){
-      Route[param]();
+    Route[param]();
   } else {
-    current_department = state.filter(dep => dep.id === +param.substring(1))[0];
+    current_department = state.find(dep => dep.id === +param.substring(1));
     buildContent();
   }
 }
 
 const buildPage = (string) => {
-  $('#app').html('<div class="jumbotron"><h1 class="display-4">' + string + '</h1></div>');
+  $('#app').html(`<div class="jumbotron"><h1 class="display-4">${string}</h1></div>`);
 }
 
 //Building navigation
@@ -92,53 +98,53 @@ const buildContent = () => {
   if (current_department === undefined) {
     $('#app').html('This page does not exist');
   } else {
-    var div = $('<div/>').addClass('jumbotron');
-      $('<h3/>').addClass('display-4 d-inline').text(current_department.department_title).appendTo(div);
-      renderButton('Delete department', 'btn btn-danger ml-5 mb-3', div, () => {
-        state = state.filter(item => item !== current_department);
-        buildNavigation(state);
-        if (state.length) {
-          windowHistoryPushState(state[state.length - 1].id);
-          render(window.location.pathname);
-        } else {
-          windowHistoryPushState('no-dep');
-          render('/no-dep');
-        }
-      });
-      renderButton('Edit department', 'btn btn-warning ml-5 mb-3', div, () => {
-        windowHistoryPushState('edit-department');
+    let div = $('<div/>').addClass('jumbotron');
+    $('<h3/>').addClass('display-4 d-inline').text(current_department.department_title).appendTo(div);
+    renderButton('Delete department', 'btn btn-danger ml-5 mb-3', div, () => {
+      state = state.filter(department => current_department !== current_department);
+      buildNavigation(state);
+      if (state.length) {
+        windowHistoryPushState(state[state.length - 1].id);
         render(window.location.pathname);
-      });
-      $('<p/>').html('Head of department - ' + '<b>' + current_department.head + '</b>').appendTo(div);
-      $('<p/>').html('Average salary : ' + averageSalary(current_department)).appendTo(div);
-      $('<p/>').html('Total salary : ' + totalSalary(current_department)).appendTo(div);
-      $('<p/>').html(getList()).appendTo(div);
-      $('<hr/>').appendTo(div);
-      $('<p/>').html(current_department.description).appendTo(div);
-      $('<h4/>').html('Employees:').appendTo(div);
-      buildTable(current_department).appendTo(div);
-      renderButton('Add New Employee', 'btn btn-success', div, () => {
-        windowHistoryPushState('add-employee');
+      } else {
+        windowHistoryPushState('no-dep');
         render(window.location.pathname);
-       });
-      $('#app').html(div);
+      }
+    });
+    renderButton('Edit department', 'btn btn-warning ml-5 mb-3', div, () => {
+      windowHistoryPushState('edit-department');
+      render(window.location.pathname);
+    });
+    $('<p/>').html(`Head of department - <b>${current_department.head}</b>`).appendTo(div);
+    $('<p/>').html(`Average salary : ${averageSalary(current_department)}`).appendTo(div);
+    $('<p/>').html(`Total salary : ${totalSalary(current_department)}`).appendTo(div);
+    $('<p/>').html(getList()).appendTo(div);
+    $('<hr/>').appendTo(div);
+    $('<p/>').html(current_department.description).appendTo(div);
+    $('<h4/>').html('Employees:').appendTo(div);
+    buildTable(current_department).appendTo(div);
+    renderButton('Add New Employee', 'btn btn-success', div, () => {
+      windowHistoryPushState('add-employee');
+      render(window.location.pathname);
+     });
+    $('#app').html(div);
   }
 }
 
 const buildTable = ({employees}) => {
-  var table = $('<table/>').addClass('table');
-  if (employees.length === 0) {
+  let table = $('<table/>').addClass('table');
+  if(employees.length === 0) {
     table.append('You have not any employees');
   } else {
-      employees.forEach(employee => {
-         table.append(renderTableRow(employee))
-      });
+    employees.forEach(employee => {
+      table.append(renderTableRow(employee));
+    });
   }
     return table;
 }
 
 const renderTableRow = (employee) => {
-  var row = $('<tr>');
+  let row = $('<tr>');
   $('<td>').html(employee.firstName).appendTo(row);
   $('<td>').html(employee.secondName).appendTo(row);
   $('<td>').html(employee.date).appendTo(row);
@@ -147,17 +153,16 @@ const renderTableRow = (employee) => {
   renderButton('Delete', 'btn btn-danger', row,() => {
     state = state.map(dep => {
       if (dep === current_department) {
+        let deletedEmployees = dep.employees.filter(currentEmployee => {
+          return currentEmployee !== employee;
+        });
         return {
           ...dep,
-          employees: dep.employees.filter(emploee => {
-            if (emploee !== employee) {
-              return emploee;
-                }
-             })
-          }
+          employees: deletedEmployees
+          };
       } else {
         return dep;
-        }
+      }
      })
       render(window.location.pathname);
     });
@@ -180,15 +185,15 @@ const renderButton = (buttonTitle, buttonClass, appendPlace, callBack) => {
 
 const renderInputField = (id, title, placeholder, type, appendPlace) => {
   let field = $('<div/>');
-    $('<label/>').attr('for', id).text(title).appendTo(field);
-    $('<input/>').attr('id', id).attr('placeholder', placeholder).attr('type', type).addClass('form-control').appendTo(field);
+  $('<label/>').attr('for', id).text(title).appendTo(field);
+  $('<input/>').attr('id', id).attr('placeholder', placeholder).attr('type', type).addClass('form-control').appendTo(field);
   return field.appendTo(appendPlace);
 }
 
 const renderTextareaField = (id, title, placeholder, type, appendPlace) => {
   let field = $('<div/>');
-    $('<label/>').attr('for', id).text(title).appendTo(field);
-    $('<textarea/>').attr('id', id).attr('placeholder', placeholder).attr('type', type).addClass('form-control').appendTo(field);
+  $('<label/>').attr('for', id).text(title).appendTo(field);
+  $('<textarea/>').attr('id', id).attr('placeholder', placeholder).attr('type', type).addClass('form-control').appendTo(field);
   return field.appendTo(appendPlace);
 
 }
@@ -196,40 +201,38 @@ const renderTextareaField = (id, title, placeholder, type, appendPlace) => {
 const renderDepartmentForm = () => {
   let div = $('<div/>').addClass('jumbotron w-50 m-auto');
   let form = $('<form/>').appendTo(div);
-   renderInputField('dep_name', 'Department label', 'Enter the name of department...', 'text', form);
-   renderInputField('dep_head_name', 'Department head name:', 'Enter the name of the head of department...', 'text', form);
-   renderTextareaField('dep_description', 'Department description:', 'Enter the department description...', 'text', form);
+  renderInputField('dep_name', 'Department label', 'Enter the name of department...', 'text', form);
+  renderInputField('dep_head_name', 'Department head name:', 'Enter the name of the head of department...', 'text', form);
+  renderTextareaField('dep_description', 'Department description:', 'Enter the department description...', 'text', form);
   $('#app').html(div);
 }
 
 const renderEmployeeForm = () => {
-    let div = $('<div/>').addClass('jumbotron w-50 m-auto');
-    let form = $('<form/>').appendTo(div);
-    renderInputField('employee_first_name', 'Employee first name', 'Enter employee first name...', 'text', form);
-    renderInputField('employee_second_name', 'Employee second name:', 'Enter employee second name...', 'text', form);
-    renderInputField('employee_date', 'Employee birth date:', 'Enter employee\'s date of birth...', 'date', form);
-    renderInputField('employee_salary', 'Employee salary:', 'Enter employee\'s salary...', 'number', form);
-    $('#app').html(div);
+  let div = $('<div/>').addClass('jumbotron w-50 m-auto');
+  let form = $('<form/>').appendTo(div);
+  renderInputField('employee_first_name', 'Employee first name', 'Enter employee first name...', 'text', form);
+  renderInputField('employee_second_name', 'Employee second name:', 'Enter employee second name...', 'text', form);
+  renderInputField('employee_date', 'Employee birth date:', 'Enter employee\'s date of birth...', 'date', form);
+  renderInputField('employee_salary', 'Employee salary:', 'Enter employee\'s salary...', 'number', form);
+  $('#app').html(div);
 }
 
 const renderAddDepartmentForm = () => {
   renderDepartmentForm();
   renderButton('Add new department','btn btn-secondary float-right mt-2' , 'form', () => {
-      //adding new department
-      state.push({
-          id: state.length ? state[state.length - 1].id + 1 : 1,
-          department_title: $('#dep_name').val(),
-          description: $('#dep_description').val(),
-          head: $('#dep_head_name').val(),
-          employees: []
-      });
+    //adding new department
+    state.push({
+      id: state.length ? state[state.length - 1].id + 1 : 1,
+      department_title: $('#dep_name').val(),
+      description: $('#dep_description').val(),
+      head: $('#dep_head_name').val(),
+      employees: []
+    });
 
-      //clearing input fields
-      $('#dep_name, #dep_head_name, #dep_description').val('');
-      //navigation rebuilding
-      buildNavigation(state);
-      windowHistoryPushState(state[state.length - 1].id);
-      render(window.location.pathname);
+    //navigation rebuilding
+    buildNavigation(state);
+    windowHistoryPushState(state[state.length - 1].id);
+    render(window.location.pathname);
   });
 }
 
@@ -255,7 +258,6 @@ const renderEditDepartmentForm = () => {
       }
     })
 
-    $('#dep_name, #dep_head_name, #dep_description').val('');
     //navigation rebuilding
     buildNavigation(state);
     windowHistoryPushState(current_department.id);
@@ -273,28 +275,28 @@ const renderEditEmployeeForm = () => {
   renderButton('Edit employee', 'btn btn-secondary float-right mt-3', 'form',() => {
     state = state.map(dep => {
       if(dep === current_department){
+        let editedEmployees = dep.employees.map(employee => {
+          if(employee.id === current_employee.id) {
+            return {
+              id: employee.id,
+              firstName: $('#employee_first_name').val(),
+              secondName: $('#employee_second_name').val(),
+              date: $('#employee_date').val(),
+              salary: +$('#employee_salary').val()
+            };
+          } else {
+            return employee;
+          }
+        });
         return {
           ...dep,
-            employees: dep.employees.map(employee => {
-            if(employee.id === current_employee.id) {
-              return {
-                  id: employee.id,
-                  firstName: $('#employee_first_name').val(),
-                  secondName: $('#employee_second_name').val(),
-                  date: $('#employee_date').val(),
-                  salary: +$('#employee_salary').val()
-              }
-            } else {
-                return employee;
-            }
-          })
+          employees: editedEmployees
         }
       } else {
           return dep;
       }
     })
 
-    $('#dep_name, #dep_head_name, #dep_description').val('');
     windowHistoryPushState(current_department.id);
     render(window.location.pathname);
   });
@@ -304,17 +306,17 @@ const renderAddEmployeeForm = () => {
   renderEmployeeForm();
   renderButton('Add New Employee','btn btn-secondary float-right mt-3', 'form', () => {
     state = state.map(dep => {
-    if(dep === current_department){
-       dep.employees.push({
+      if(dep === current_department){
+        dep.employees.push({
           id: dep.employees.length ? dep.employees[dep.employees.length - 1].id + 1 : 1,
           firstName: $('#employee_first_name').val(),
           secondName: $('#employee_second_name').val(),
           date: $('#employee_date').val(),
           salary: +$('#employee_salary').val()
-      })
-          return dep;
+        })
+        return dep;
       } else {
-          return dep;
+        return dep;
       }
     });
 
