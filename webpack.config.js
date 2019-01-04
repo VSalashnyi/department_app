@@ -1,15 +1,15 @@
 const path = require("path");
 const webpack = require("webpack");
-const webpack_rules = [];
+
 module.exports = {
-    entry: "./source/main.js",
+    entry: ["./source/departmentApp.js"],
     output: {
         filename: "bundle.js"
     },
     module: {
         rules: [{
             test: /\.js$/,
-            exclude: /(node_modules|bower_components)/,
+            exclude: /(node_modules,main)/,
             use: {
                 loader: "babel-loader",
                 options: {
@@ -19,14 +19,3 @@ module.exports = {
         }]
     }
 };
-let babelLoader = {
-    test: /\.js$/,
-    exclude: /(node_modules|bower_components)/,
-    use: {
-        loader: "babel-loader",
-        options: {
-            presets: ["@babel/preset-env"]
-        }
-    }
-};
-webpack_rules.push(babelLoader);

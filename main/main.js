@@ -51,7 +51,7 @@ const getList = () => {
   paragraph = $('<p/>').html('Employees with salary lower than average in the department:'),
   list = $('<ul>');
   current_department.employees.forEach(function (employee) {
-    if(employee.salary < averageSalary(current_department.employees)) {
+    if(employee.salary < averageSalary(current_department)) {
       list.append($('<li>').text(`${employee.firstName} ${employee.secondName}`));
       count++;
     }
@@ -101,7 +101,7 @@ const buildContent = () => {
     let div = $('<div/>').addClass('jumbotron');
     $('<h3/>').addClass('display-4 d-inline').text(current_department.department_title).appendTo(div);
     renderButton('Delete department', 'btn btn-danger ml-5 mb-3', div, () => {
-      state = state.filter(department => current_department !== current_department);
+      state = state.filter(department => department !== current_department);
       buildNavigation(state);
       if (state.length) {
         windowHistoryPushState(state[state.length - 1].id);
